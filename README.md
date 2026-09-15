@@ -2,7 +2,7 @@
 
 ViT-Base(timm)의 patch size(P=8/16/32)에 따른 적대적 공격(PGD / LaVAN / PatchFool) 강건성 실험.
 (2026-09-15: 이 프로젝트는 원래 `ViT_robust`였다가, 방어 기법 개발이 별도 프로젝트
-[`PatchSwitch`](../PatchSwitch/)로 분리되면서 이름을 바꿨다 — 여기는 "patch size 특성 분석"에
+[`ViT_patchSwitch`](../ViT_patchSwitch/)로 분리되면서 이름을 바꿨다 — 여기는 "patch size 특성 분석"에
 집중하는 원래 8개 실험만 남긴다.)
 
 ## 실험 목록
@@ -32,14 +32,14 @@ ViT-Base(timm)의 patch size(P=8/16/32)에 따른 적대적 공격(PGD / LaVAN /
 공격 토큰 개수를 P8/P16/P32에서 동일하게 고정하는 실험 — 위 8개 실험이 면적을 통제 변수로
 쓴 것과 대조되는 각도. 자세한 내용은 [`09_protocol_c/`](09_protocol_c/) 참고.
 
-## 적응형 방어 프로젝트 (`PatchSwitch/`)
+## 적응형 방어 프로젝트 (`ViT_patchSwitch/`)
 
 위 실험들(패치 크기 vs 강건성 특성 분석)과는 별도로, 이 발견("PatchFool에 대해 P8이 P16보다
 압도적으로 강건함")을 실제 방어로 발전시키는 후속 연구는 **완전히 독립된 프로젝트**
-[`../PatchSwitch/`](../PatchSwitch/)로 분리했다(2026-09-15) — "P16으로 추론하다가 공격이
+[`../ViT_patchSwitch/`](../ViT_patchSwitch/)로 분리했다(2026-09-15) — "P16으로 추론하다가 공격이
 의심되면 P8로 통째 재분류하는 적응형 방어"의 탐지·위치특정·복원율·adaptive attacker 대응까지
 전부 그쪽에 있다. `src/`는 그쪽이 자기 것으로 새로 복사해서 쓰므로 이 프로젝트에 전혀
-의존하지 않는다. 자세한 내용은 [`PatchSwitch/README.md`](../PatchSwitch/README.md) 참고.
+의존하지 않는다. 자세한 내용은 [`ViT_patchSwitch/README.md`](../ViT_patchSwitch/README.md) 참고.
 
 ## 디렉토리 구조
 
