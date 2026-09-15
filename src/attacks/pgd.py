@@ -1,14 +1,9 @@
-"""
-PGD Attack - Madry et al., 2018
-입력이 정규화된 텐서임을 고려해 clamp를 정규화 공간에서 수행.
-"""
-
 import torch
 import torch.nn.functional as F
 
-# ImageNet 정규화 상수
-_MU  = torch.tensor([0.485, 0.456, 0.406]).view(3, 1, 1)
-_STD = torch.tensor([0.229, 0.224, 0.225]).view(3, 1, 1)
+# 우리가 쓰는 timm 체크포인트(augreg 계열)의 정규화 상수 — src/dataset.py와 동일 (mean=std=0.5)
+_MU  = torch.tensor([0.5, 0.5, 0.5]).view(3, 1, 1)
+_STD = torch.tensor([0.5, 0.5, 0.5]).view(3, 1, 1)
 
 
 def pgd_attack(

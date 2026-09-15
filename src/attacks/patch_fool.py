@@ -1,13 +1,3 @@
-"""
-Patch-Fool Attack (Fu et al., ICLR 2022)
-https://github.com/GATECH-EIC/Patch-Fool
-
-timm 1.0.x 호환 버전:
-  - attention hook: blk.attn.register_forward_hook 으로 softmax 직후 값 수집
-  - timm Attention.forward signature: (x, attn_mask, is_causal) → x 반환
-  - qkv 직접 분해해서 attention weight 계산
-"""
-
 import torch
 import torch.nn.functional as F
 import numpy as np
@@ -70,6 +60,37 @@ def _select_patch_attn(attn_weights, layer_idx, num_patch, device):
     return a.argsort(descending=True)[:, :num_patch]  # (B, num_patch)
 
 
+def _select_contiguous_block(attn_weights, layer_idx, patch_size_model, H, device,
+                             ref_patch_size=16):
+    """
+    개별 상위 attention 패치가 아니라, ref_patch_size(기본 16px) 하나와 정확히 같은
+    물리적 영역을 덮는 block x block 개의 인접 패치를 고른다 (block = ref_patch_size // patch_size_model).
+    각 후보 블록의 attention 합이 가장 큰 블록을 선택 — "면적은 같지만 뭉쳐있는" 버전.
+    Returns: (B, block**2) 패치 인덱스 텐서 — _select_patch_attn과 같은 포맷
+    """
+    a = attn_weights[layer_idx].to(device).mean(dim=1)[:, 0, 1:]   # (B, num_patches)
+    ppl   = H // patch_size_model                # patches per line
+    block = ref_patch_size // patch_size_model    # 한 변에 들어가는 패치 수
+    assert ppl % block == 0, \
+        f"ppl({ppl})이 block({block})으로 안 나눠떨어짐 — ref_patch_size 확인 필요"
+
+    B = a.shape[0]
+    grid = a.view(B, ppl, ppl)
+    n_blocks = ppl // block
+    # block x block 단위로 attention 합산 → 블록별 점수
+    block_scores = grid.unfold(1, block, block).unfold(2, block, block)  # (B, n_blocks, n_blocks, block, block)
+    block_scores = block_scores.sum(dim=(-1, -2))                        # (B, n_blocks, n_blocks)
+    best_block   = block_scores.reshape(B, -1).argmax(dim=1)  # (B,)
+    block_row    = best_block // n_blocks
+    block_col    = best_block % n_blocks
+
+    offsets = torch.tensor(
+        [(dr, dc) for dr in range(block) for dc in range(block)], device=device)  # (block**2, 2)
+    rows = block_row.unsqueeze(1) * block + offsets[:, 0].unsqueeze(0)  # (B, block**2)
+    cols = block_col.unsqueeze(1) * block + offsets[:, 1].unsqueeze(0)  # (B, block**2)
+    return rows * ppl + cols
+
+
 def _build_mask(max_patch_index, B, H, patch_size, device):
     """선택된 패치 위치에 1인 spatial mask (B, 1, H, W)."""
     ppl  = H // patch_size   # patches per line
@@ -90,7 +111,7 @@ def patch_fool_attack(
     patch_size_model=16,
     num_patch=1,
     attack_mode='Attention',      # 'Attention' | 'CE_loss'
-    patch_select='Attn',          # 'Attn' | 'Rand'
+    patch_select='Attn',          # 'Attn' | 'Rand' | 'Contiguous'
     attn_layer_idx=4,
     train_attack_iters=250,
     attack_lr=0.22,
@@ -119,6 +140,10 @@ def patch_fool_attack(
     if patch_select == 'Attn' and len(attn_weights) > attn_layer_idx:
         max_patch_index = _select_patch_attn(
             attn_weights, attn_layer_idx, num_patch, device)
+    elif patch_select == 'Contiguous' and len(attn_weights) > attn_layer_idx:
+        # num_patch 대신 ref_patch_size(16px)와 동일 면적을 덮는 인접 블록을 선택
+        max_patch_index = _select_contiguous_block(
+            attn_weights, attn_layer_idx, patch_size_model, H, device)
     else:
         max_patch_index = torch.from_numpy(
             np.random.randint(0, num_patches, (B, num_patch))).to(device)

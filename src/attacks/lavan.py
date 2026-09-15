@@ -1,8 +1,9 @@
 import torch
 import torch.nn.functional as F
 
-_MU  = torch.tensor([0.485, 0.456, 0.406]).view(3,1,1)
-_STD = torch.tensor([0.229, 0.224, 0.225]).view(3,1,1)
+# 우리가 쓰는 timm 체크포인트(augreg 계열)의 정규화 상수 — src/dataset.py와 동일 (mean=std=0.5)
+_MU  = torch.tensor([0.5, 0.5, 0.5]).view(3,1,1)
+_STD = torch.tensor([0.5, 0.5, 0.5]).view(3,1,1)
 
 def lavan_attack(
     model,
@@ -14,14 +15,8 @@ def lavan_attack(
     alpha=2/255,
     targeted=False,
     target_labels=None,
+    fixed_loc=None,        # None → 랜덤 위치(기존). 'center' → 항상 이미지 중앙 고정
 ):
-    """
-    LaVAN: Localized and Visible Adversarial Noise (Karmon et al., ICML 2018)
-
-    패치 위치: 공격 시작 시 랜덤 선택 후 고정 (논문 기본 설정)
-    - 논문: "location is randomly chosen once at the beginning of the attack"
-    - 패치가 이미지 경계를 벗어나지 않도록 clamp
-    """
     model.eval()
     images = images.clone().detach().to(device)
     labels = labels.to(device)
@@ -32,11 +27,17 @@ def lavan_attack(
 
     # 패치 크기 계산 (면적 기준 patch_ratio)
     patch_px = int(H * (patch_ratio ** 0.5))
-
-    # 패치 위치 랜덤 선택 (배치 내 모든 샘플 동일 위치 — 논문 기본)
     max_start = H - patch_px
-    s_h = torch.randint(0, max(max_start, 1), (1,)).item()
-    s_w = torch.randint(0, max(max_start, 1), (1,)).item()
+
+    if fixed_loc == 'center':
+        # 위치를 항상 이미지 중앙으로 고정 — 위치 변동성을 배제하고
+        # 같은 물리적 영역에서 patch size별 강건성을 비교하기 위함
+        s_h = max_start // 2
+        s_w = max_start // 2
+    else:
+        # 패치 위치 랜덤 선택 (배치 내 모든 샘플 동일 위치 — 논문 기본)
+        s_h = torch.randint(0, max(max_start, 1), (1,)).item()
+        s_w = torch.randint(0, max(max_start, 1), (1,)).item()
     e_h = s_h + patch_px
     e_w = s_w + patch_px
 
