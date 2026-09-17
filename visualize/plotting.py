@@ -100,6 +100,9 @@ def draw_metric_panel(ax, data, attacks, p_values, metric, title, direction, y_m
     x   = np.arange(len(attacks))
     w   = 0.75 / len(p_values)
     off = np.linspace(-(len(p_values)-1)/2, (len(p_values)-1)/2, len(p_values)) * w
+    # P값이 3개 이상이면 막대끼리 너무 붙어있어서 "P=" 라벨을 넣으면 서로 겹친다
+    # (legend에 이미 hatch로 P가 표시되니) — 2개(예: 01_baseline_p8p16)일 때만 라벨을 얹는다
+    show_p_label = len(p_values) <= 2
 
     for pi, p in enumerate(p_values):
         for ai, atk in enumerate(attacks):
@@ -119,9 +122,11 @@ def draw_metric_panel(ax, data, attacks, p_values, metric, title, direction, y_m
                   error_kw=dict(elinewidth=1.1, ecolor='#1F2937'))
             scatter_seeds(ax, xpos, vals, rng)
             if m > 0:
+                label = f'P={p}\n{m:.1f}' if show_p_label else f'{m:.1f}'
                 ax.text(xpos, max(vals + [m + s]) + y_max*0.012,
-                       f'{m:.1f}', ha='center', va='bottom',
-                       fontsize=FS_BAR_VALUE, fontweight='bold', color=color)
+                       label, ha='center', va='bottom',
+                       fontsize=FS_BAR_VALUE, fontweight='bold', color=color,
+                       linespacing=1.3)
     ax.set_title(f'{title}\n({direction} is better)',
                 fontsize=FS_TITLE_SUB, fontweight='bold', pad=12)
     ax.set_xticks(x)

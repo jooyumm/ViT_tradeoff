@@ -94,7 +94,8 @@ visualize/                 결과 시각화. 파일명 번호는 어느 scripts/
   00_attack_demo.py             실험 무관 — 공격 1건 시각화 (발표용, 이미지 1장 기준 결과표)
   00_fig_ca.py                   실험 무관 — Clean Accuracy만 단독 그래프 (공격과 무관, P에만 의존)
   01_fig_baseline.py             실험 1-3 그래프 — RA/ASR 메인 비교 (PGD/LaVAN/PatchFool x P=8/16/32)
-  01_fig_baseline_p16p32.py       위와 같은 로그, PGD·P=8 제외한 축약판 (LaVAN/PatchFool x P=16/32)
+  01_fig_baseline_p8p16.py        위와 같은 로그, PGD·P=32 제외한 축약판 (LaVAN/PatchFool x P=8/16,
+                                 막대마다 P=8/P=16 라벨도 표시 — P값이 2개뿐일 때만 자동으로 켜짐)
   01_tbl_baseline.py             실험 1-3 표
   02_fig_lavan_fixedloc.py        실험 7 그래프
   02_tbl_lavan_fixedloc.py        실험 7 표
@@ -149,7 +150,7 @@ for seed in 42 123 2024; do sbatch --export=SEED=$seed scripts/01_baseline.sh; d
 ```bash
 python visualize/00_fig_ca.py                   # results/figures/00_ca.png
 python visualize/01_fig_baseline.py             # results/figures/01_baseline_all.png
-python visualize/01_fig_baseline_p16p32.py      # results/figures/01_baseline.png
+python visualize/01_fig_baseline_p8p16.py       # results/figures/01_baseline.png
 python visualize/01_tbl_baseline.py             # results/tables/01_baseline_table.png
 python visualize/02_fig_lavan_fixedloc.py       # results/figures/02_lavan_fixedloc.png
 python visualize/02_tbl_lavan_fixedloc.py       # results/tables/02_lavan_fixedloc_table.png
