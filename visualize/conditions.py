@@ -33,16 +33,3 @@ PATCHFOOL_RANDSEL = [
     ('P=16\nRand-select', 'patch_fool', 16, 'randsel', '',    1.0),
 ]
 PATCHFOOL_RANDSEL_TITLE = 'PatchFool: Attention-Guided vs. Random Token Selection'
-
-# 실험 8: LaVAN 공격 면적 스윕 (x, tag) — x는 이미지 대비 패치 면적 %, 오름차순.
-# 2%는 baseline(tag='')과 동일해서 재사용 — scripts/06_lavan_areasweep.sh 참고.
-LAVAN_AREASWEEP = [
-    (0.5, 'lavanarea5'),
-    (1,   'lavanarea10'),
-    (2,   ''),
-    (5,   'lavanarea50'),
-    (10,  'lavanarea100'),
-]
-LAVAN_AREASWEEP_P      = [8, 16, 32]
-LAVAN_AREASWEEP_XLABEL = 'LaVAN patch area (% of image)'
-LAVAN_AREASWEEP_TITLE  = 'LaVAN: Robustness vs. Attack Area'

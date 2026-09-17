@@ -237,7 +237,7 @@ def plot_condition_comparison(conditions, out_path, suptitle, color=None, rotate
 
     rng = np.random.default_rng(0)
     fig, (ax_ra, ax_asr) = plt.subplots(1, 2, figsize=(14, 7))
-    fig.suptitle(suptitle, fontsize=FS_TITLE_MAIN, fontweight='bold', y=0.99)
+    fig.suptitle(suptitle, fontsize=FS_TITLE_MAIN, fontweight='bold', y=1.02)
 
     all_vals = [v for _, ra, asr, _, _ in rows for v in ra + asr]
     y_max = max(all_vals) * 1.25 if all_vals else 100
@@ -276,11 +276,12 @@ def plot_condition_comparison(conditions, out_path, suptitle, color=None, rotate
                                 markerfacecolor=dkw['facecolor'],
                                 markeredgecolor=dkw['edgecolor'],
                                 markeredgewidth=dkw['linewidth'])
-    # 제목이 figure 상단 corner까지 넓게 퍼질 수 있어서, legend는 figure 전체 corner가 아니라
-    # ax_asr 안쪽(막대 위 여백, y_max에 1.25배 헤드룸이 있어 안 겹침)에 둬서 제목과 안 겹치게 함
-    ax_asr.legend(handles=[seed_handle], loc='upper right', fontsize=11, framealpha=0.92)
+    # 01(plot_results)과 동일한 방식: legend를 그래프 안쪽에 끼워넣지 않고, 오른쪽에
+    # 전용 여백을 예약해서(tight_layout rect) 그 안에 둔다 — 제목과도 안 겹치고 막대와도 안 겹침
+    fig.legend(handles=[seed_handle], loc='upper right', fontsize=FS_LEGEND,
+              bbox_to_anchor=(1.0, 1.0), framealpha=0.92, ncol=1)
 
-    plt.tight_layout(rect=[0, 0, 1, 0.95])
+    plt.tight_layout(rect=[0, 0, 0.85, 0.97])
     plt.savefig(out_path, dpi=150, bbox_inches='tight')
     print(f"Saved: {out_path}")
     plt.close()

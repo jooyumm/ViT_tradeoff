@@ -3,7 +3,8 @@
 ViT-Base(timm)의 patch size(P=8/16/32)에 따른 적대적 공격(PGD / LaVAN / PatchFool) 강건성 실험.
 (2026-09-15: 이 프로젝트는 원래 `ViT_robust`였다가, 방어 기법 개발이 별도 프로젝트
 [`ViT_patchSwitch`](../ViT_patchSwitch/)로 분리되면서 이름을 바꿨다 — 여기는 "patch size 특성 분석"에
-집중하는 원래 8개 실험만 남긴다.)
+집중하는 원래 8개 실험 중 7개를 남긴다 — 실험 8(LaVAN 공격 면적 스윕)은 2026-09-17에
+분석 가치가 낮다고 판단해 제거했다.)
 
 ## 실험 목록
 
@@ -19,17 +20,19 @@ ViT-Base(timm)의 patch size(P=8/16/32)에 따른 적대적 공격(PGD / LaVAN /
 | 5 | PatchFool area-matched (contiguous) | P8(4토큰, P16과 같은 2×2 블록) vs #4(scattered) | 같은 면적이라도 공격이 뭉쳐있는지 흩어져있는지가 중요한가? |
 | 6 | PatchFool 토큰 선택 (Attn vs Rand) | P8/16 attention 선택(baseline) vs 랜덤 선택 | 똑똑하게 토큰을 고르는 게 중요한가, 토큰 단위 공격 자체가 중요한가? |
 | 7 | LaVAN 위치 고정 | P8/16 랜덤 위치(baseline) vs 중앙 고정 | #2의 결과가 위치 변동성 때문에 생긴 착시는 아닌가? |
-| 8 | LaVAN 공격 면적 스윕 | P8/16/32, patch area 0.5%/1%/2%(baseline)/5%/10% | 공격 면적에 따라 P=8 vs P=16/32 강건성 순위가 뒤바뀌는 지점(crossover)이 있는가? |
 
 (전부 ViT-Base, ImageNet-1k val, 3 seed(42/123/2024) × 1000 샘플)
 
 `LaVAN 토큰 개수 고정`(오염 토큰을 P별로 동일하게 맞추는 실험)은 한 번 돌려봤지만 제외했다 —
-"오염 토큰 수 = 면적 / P²"라 토큰 수를 고정하면 면적이 P²배씩 벌어지는데, 이건 실험 8(면적 스윕)이
+"오염 토큰 수 = 면적 / P²"라 토큰 수를 고정하면 면적이 P²배씩 벌어지는데, 이건 baseline(#2)이
 이미 다루는 (면적, P, RA) 관계를 다른 각도로 한 번 더 자른 것일 뿐 독립적인 정보를 안 줘서 뺐다.
+
+**2026-09-17 제거**: 실험 8(LaVAN 공격 면적 스윕, `06_lavan_areasweep.*`)을 분석 가치가 낮다고
+판단해 코드·시각화·결과 로그를 전부 지웠다. 필요하면 git 히스토리(`git log -- scripts/06_lavan_areasweep.sh` 등)에서 복구 가능.
 
 ## 관련 실험: Protocol C (`09_protocol_c/`)
 
-공격 토큰 개수를 P8/P16/P32에서 동일하게 고정하는 실험 — 위 8개 실험이 면적을 통제 변수로
+공격 토큰 개수를 P8/P16/P32에서 동일하게 고정하는 실험 — 위 7개 실험이 면적을 통제 변수로
 쓴 것과 대조되는 각도. 자세한 내용은 [`09_protocol_c/`](09_protocol_c/) 참고.
 
 ## 적응형 방어 프로젝트 (`ViT_patchSwitch/`)
@@ -71,7 +74,6 @@ scripts/                   SLURM 배치 제출 스크립트. 파일명 번호 = 
   03_patchfool_areamatch_scattered.sh   실험 4: PatchFool area-matched(scattered) x P=8 — tag=areamatch16
   04_patchfool_areamatch_contiguous.sh  실험 5: PatchFool area-matched(contiguous) x P=8 — tag=areamatch16contig
   05_patchfool_randsel.sh          실험 6: PatchFool Rand 토큰 선택 x P=8/16 — tag=randsel
-  06_lavan_areasweep.sh            실험 8: LaVAN 공격 면적 스윕 x P=8/16/32 — tag=lavanarea{permille}
                              예: sbatch --export=SEED=42 scripts/01_baseline.sh
                              (반드시 저장소 루트에서 제출할 것 — 로그 경로가 제출 위치 기준 상대경로임)
                              01_baseline.sh는 9개 조합을 한 GPU에서 순차 실행하므로 --time=15:00:00로 넉넉히 잡음
@@ -82,13 +84,17 @@ visualize/                 결과 시각화. 파일명 번호는 어느 scripts/
   results_io.py                results/logs/*.txt 파싱 + 다중 시드 집계
   plotting.py                   그래프 그리기 (plot_results, plot_single, plot_condition_comparison,
                                  plot_sweep) — P별 색상은 p_color_shades()로 공격 기본색(ATK_COLOR)의
-                                 밝기만 다르게 자동 생성 (같은 공격이면 항상 같은 색 계열)
+                                 밝기만 다르게 자동 생성 (같은 공격이면 항상 같은 색 계열).
+                                 plot_sweep/gather_sweep_data/make_sweep_table은 연속값 스윕 실험용
+                                 공용 유틸(현재 이걸 쓰는 실험은 없지만 다음에 스윕형 ablation
+                                 추가할 때 재사용하도록 남겨둠)
   tables.py                     표 그리기 (make_baseline_table, make_condition_table, make_sweep_table)
                                  — PNG만, LaTeX는 안 뽑음
   conditions.py                 ablation 비교 조건(CONDITIONS, 스윕 스펙) 정의 — 실험별 fig/tbl 스크립트가 공유
   00_attack_demo.py             실험 무관 — 공격 1건 시각화 (발표용, 이미지 1장 기준 결과표)
   00_fig_ca.py                   실험 무관 — Clean Accuracy만 단독 그래프 (공격과 무관, P에만 의존)
-  01_fig_baseline.py             실험 1-3 그래프 — RA/ASR 메인 비교
+  01_fig_baseline.py             실험 1-3 그래프 — RA/ASR 메인 비교 (PGD/LaVAN/PatchFool x P=8/16/32)
+  01_fig_baseline_p16p32.py       위와 같은 로그, PGD·P=8 제외한 축약판 (LaVAN/PatchFool x P=16/32)
   01_tbl_baseline.py             실험 1-3 표
   02_fig_lavan_fixedloc.py        실험 7 그래프
   02_tbl_lavan_fixedloc.py        실험 7 표
@@ -96,8 +102,6 @@ visualize/                 결과 시각화. 파일명 번호는 어느 scripts/
   03_tbl_patchfool_areamatch.py   실험 4+5 표
   05_fig_patchfool_randsel.py     실험 6 그래프
   05_tbl_patchfool_randsel.py     실험 6 표
-  06_fig_lavan_areasweep.py       실험 8 그래프 (P별 선 그래프, x축=공격 면적)
-  06_tbl_lavan_areasweep.py       실험 8 표
 
 results/                  전부 .gitignore 대상 (재현 가능한 산출물이라 버전관리 안 함)
   logs/                       실험 로그 원본 텍스트 (파일명에 attack/patch_size/seed/[tag]/timestamp 인코딩)
@@ -136,8 +140,8 @@ for seed in 42 123 2024; do sbatch --export=SEED=$seed scripts/01_baseline.sh; d
 `02_fig_lavan_fixedloc.py`/`02_tbl_lavan_fixedloc.py`처럼 `plot_condition_comparison()` /
 `make_condition_table()`을 호출하는 그래프·표 스크립트를 몇 줄로 추가하면 된다
 (결과 파일은 `results_io.FIG_DIR`/`TABLE_DIR`에 저장하면 다른 그래프/표들과 같은 자리에 모인다).
-새 스크립트/시각화 파일 번호는 다음으로 이어서 붙이면 된다 (예: 실험 9 추가 시 `07_...`).
-연속값을 스윕하는 실험(실험 8처럼)이면 `plot_condition_comparison`/`make_condition_table` 대신
+새 스크립트/시각화 파일 번호는 다음으로 이어서 붙이면 된다 (예: 실험 9 추가 시 `06_...`).
+연속값을 스윕하는 실험이면 `plot_condition_comparison`/`make_condition_table` 대신
 `plot_sweep`/`make_sweep_table` + `results_io.gather_sweep_data()`를 쓰면 된다.
 
 ## 시각화 뽑기
@@ -145,6 +149,7 @@ for seed in 42 123 2024; do sbatch --export=SEED=$seed scripts/01_baseline.sh; d
 ```bash
 python visualize/00_fig_ca.py                   # results/figures/00_ca.png
 python visualize/01_fig_baseline.py             # results/figures/01_baseline_all.png
+python visualize/01_fig_baseline_p16p32.py      # results/figures/01_baseline.png
 python visualize/01_tbl_baseline.py             # results/tables/01_baseline_table.png
 python visualize/02_fig_lavan_fixedloc.py       # results/figures/02_lavan_fixedloc.png
 python visualize/02_tbl_lavan_fixedloc.py       # results/tables/02_lavan_fixedloc_table.png
@@ -152,6 +157,4 @@ python visualize/03_fig_patchfool_areamatch.py  # results/figures/03_patchfool_a
 python visualize/03_tbl_patchfool_areamatch.py  # results/tables/03_patchfool_areamatch_table.png
 python visualize/05_fig_patchfool_randsel.py    # results/figures/05_patchfool_randsel.png
 python visualize/05_tbl_patchfool_randsel.py    # results/tables/05_patchfool_randsel_table.png
-python visualize/06_fig_lavan_areasweep.py      # results/figures/06_lavan_areasweep.png
-python visualize/06_tbl_lavan_areasweep.py      # results/tables/06_lavan_areasweep_table.png
 ```
