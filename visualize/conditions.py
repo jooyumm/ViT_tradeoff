@@ -26,7 +26,7 @@ PATCHFOOL_AREAMATCH = [
     ('P=8\n4 tokens, contiguous',  'patch_fool', 8,  'areamatch16contig', 'xxx',   0.4),
     ('P=16\n1 token (256px)',      'patch_fool', 16, '',                  '',      0.9),
 ]
-PATCHFOOL_AREAMATCH_TITLE = 'PatchFool: Patch-Size Robustness vs. Perturbed-Area / Compactness Confound'
+PATCHFOOL_AREAMATCH_TITLE = 'PatchFool: Area match (scattered/contiguous)'
 
 # 실험 6: PatchFool 토큰 선택 방식 (Attn vs Rand)
 PATCHFOOL_RANDSEL = [
