@@ -13,8 +13,7 @@ from plotting import plot_ca
 
 def main():
     data = collect_all_logs()
-    plot_ca(data, os.path.join(FIG_DIR, '00_ca.png'),
-           ' (ImageNet-1k val, P=8/16/32, mean±std, dots=seeds)')
+    plot_ca(data, os.path.join(FIG_DIR, '00_ca.png'), ' (ImageNet-1k val)')
 
 
 if __name__ == '__main__':

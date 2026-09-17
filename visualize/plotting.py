@@ -191,12 +191,23 @@ def plot_ca(data, out_path, title_suffix=''):
     y_max = shared_y_max(data, attacks, p_values)
     ref_atk = attacks[0]
 
-    fig, ax = plt.subplots(figsize=(6.5, 6.5))
+    fig, ax = plt.subplots(figsize=(8.5, 6.5))
     fig.suptitle(f'Clean Accuracy{title_suffix}',
-                fontsize=FS_TITLE_MAIN, fontweight='bold', y=1.02)
+                fontsize=FS_TITLE_MAIN, fontweight='bold', y=1.0)
     draw_ca_panel(ax, data, p_values, ref_atk, y_max, rng)
 
-    plt.tight_layout()
+    # 나머지 그래프들과 동일한 방식: legend는 그래프 안쪽이 아니라 오른쪽에 전용 여백을
+    # 예약해서(tight_layout rect) 그 안에 둔다
+    dkw = seed_dot_kw(1.0)
+    seed_handle = mlines.Line2D([], [], linestyle='None', label='individual seed',
+                                marker=dkw['marker'], markersize=8,
+                                markerfacecolor=dkw['facecolor'],
+                                markeredgecolor=dkw['edgecolor'],
+                                markeredgewidth=dkw['linewidth'])
+    fig.legend(handles=[seed_handle], loc='upper right', fontsize=FS_LEGEND,
+              bbox_to_anchor=(1.0, 1.0), framealpha=0.92, ncol=1)
+
+    plt.tight_layout(rect=[0, 0, 0.78, 0.95])
     plt.savefig(out_path, dpi=150, bbox_inches='tight')
     print(f"Saved: {out_path}")
     plt.close()
