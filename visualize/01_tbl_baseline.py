@@ -21,7 +21,7 @@ def main():
                   f"CA={m['CA']}  RA={m['RA']}  ASR={m['ASR']}")
 
     make_baseline_table(data, os.path.join(TABLE_DIR, '01_baseline_table.png'),
-                        ' (ImageNet-1k val, P=8/16/32, mean±std)')
+                        ' (ImageNet-1k val)')
     print("Done.")
 
 

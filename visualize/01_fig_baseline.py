@@ -21,7 +21,7 @@ def main():
             print(f"  {atk} P={p}: seeds={m['seeds']} (n={n_seeds})  "
                   f"CA={m['CA']}  RA={m['RA']}  ASR={m['ASR']}")
 
-    suffix = ' (ImageNet-1k val, P=8/16/32, mean±std, dots=seeds)'
+    suffix = ' (ImageNet-1k val)'
     plot_results(data, os.path.join(FIG_DIR, '01_baseline_all.png'), suffix)
     print("Done.")
 

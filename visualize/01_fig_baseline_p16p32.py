@@ -26,7 +26,7 @@ def main():
             print(f"  {atk} P={p}: seeds={m['seeds']} (n={n_seeds})  "
                   f"CA={m['CA']}  RA={m['RA']}  ASR={m['ASR']}")
 
-    suffix = ' (ImageNet-1k val, P=16/32, LaVAN/PatchFool, mean±std, dots=seeds)'
+    suffix = ' (ImageNet-1k val)'
     out_path = os.path.join(FIG_DIR, '01_baseline.png')
     plot_results(data, out_path, suffix)
     print(f"Done. Saved: {out_path}")

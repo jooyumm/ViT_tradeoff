@@ -276,7 +276,9 @@ def plot_condition_comparison(conditions, out_path, suptitle, color=None, rotate
                                 markerfacecolor=dkw['facecolor'],
                                 markeredgecolor=dkw['edgecolor'],
                                 markeredgewidth=dkw['linewidth'])
-    fig.legend(handles=[seed_handle], loc='upper right', fontsize=12, framealpha=0.92)
+    # 제목이 figure 상단 corner까지 넓게 퍼질 수 있어서, legend는 figure 전체 corner가 아니라
+    # ax_asr 안쪽(막대 위 여백, y_max에 1.25배 헤드룸이 있어 안 겹침)에 둬서 제목과 안 겹치게 함
+    ax_asr.legend(handles=[seed_handle], loc='upper right', fontsize=11, framealpha=0.92)
 
     plt.tight_layout(rect=[0, 0, 1, 0.90])
     plt.savefig(out_path, dpi=150, bbox_inches='tight')

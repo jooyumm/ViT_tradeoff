@@ -14,8 +14,7 @@ LAVAN_FIXEDLOC = [
     ('P=16\nRandom loc', 'lavan', 16, '',        '',    0.7),
     ('P=16\nFixed loc',  'lavan', 16, 'fixedloc', '',    1.0),
 ]
-LAVAN_FIXEDLOC_TITLE = ('LaVAN: Random vs. Fixed (Center) Attack Location\n'
-                        '(does the P=8 vs P=16 gap hold once position variance is removed?)')
+LAVAN_FIXEDLOC_TITLE = 'LaVAN: Random vs. Fixed (Center) Attack Location'
 
 # 실험 4+5: PatchFool 면적 통제 (scattered vs contiguous)
 PATCHFOOL_AREAMATCH = [
@@ -24,9 +23,7 @@ PATCHFOOL_AREAMATCH = [
     ('P=8\n4 tokens, contiguous',  'patch_fool', 8,  'areamatch16contig', 'xxx', 0.85),
     ('P=16\n1 token (256px)',      'patch_fool', 16, '',                  '///', 1.0),
 ]
-PATCHFOOL_AREAMATCH_TITLE = (
-    'PatchFool: Patch-Size Robustness vs. Perturbed-Area / Compactness Confound\n'
-    '(is P=8 still more robust once attacked pixel area — and its compactness — is matched?)')
+PATCHFOOL_AREAMATCH_TITLE = 'PatchFool: Patch-Size Robustness vs. Perturbed-Area / Compactness Confound'
 
 # 실험 6: PatchFool 토큰 선택 방식 (Attn vs Rand)
 PATCHFOOL_RANDSEL = [
@@ -35,8 +32,7 @@ PATCHFOOL_RANDSEL = [
     ('P=16\nAttn-select', 'patch_fool', 16, '',        '',    0.7),
     ('P=16\nRand-select', 'patch_fool', 16, 'randsel', '',    1.0),
 ]
-PATCHFOOL_RANDSEL_TITLE = ('PatchFool: Attention-Guided vs. Random Token Selection\n'
-                          '(does smart targeting matter, or is attacking a token enough by itself?)')
+PATCHFOOL_RANDSEL_TITLE = 'PatchFool: Attention-Guided vs. Random Token Selection'
 
 # 실험 8: LaVAN 공격 면적 스윕 (x, tag) — x는 이미지 대비 패치 면적 %, 오름차순.
 # 2%는 baseline(tag='')과 동일해서 재사용 — scripts/06_lavan_areasweep.sh 참고.
@@ -49,5 +45,4 @@ LAVAN_AREASWEEP = [
 ]
 LAVAN_AREASWEEP_P      = [8, 16, 32]
 LAVAN_AREASWEEP_XLABEL = 'LaVAN patch area (% of image)'
-LAVAN_AREASWEEP_TITLE  = ('LaVAN: Robustness vs. Attack Area\n'
-                         '(does the P=8 vs P=16/32 gap flip at a different attack budget?)')
+LAVAN_AREASWEEP_TITLE  = 'LaVAN: Robustness vs. Attack Area'
