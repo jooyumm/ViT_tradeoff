@@ -251,6 +251,19 @@ def plot_condition_comparison(conditions, out_path, suptitle, color=None, rotate
     if not rows:
         print("표시할 데이터가 없습니다."); return
 
+    # P=8/P=16 baseline(tag='')이 있으면 그 값을 "비교 기준선"으로 각 패널에 수평선으로 그어서,
+    # 나머지 막대들이 그 기준보다 높은지/낮은지 한눈에 보이게 한다.
+    # P=8은 점선(막대 hatch가 점무늬인 것과 맞춤), P=16은 대시선(막대가 무지인 것과 맞춤)
+    p_refs = {}  # {8: {'RA':.., 'ASR':..}, 16: {...}}
+    for target_p in (8, 16):
+        for label, attack, p, tag, _, _ in conditions:
+            if p == target_p and tag == '':
+                bucket = sources[tag].get(attack, {}).get(p, {})
+                if bucket.get('RA'):
+                    p_refs[target_p] = {'RA': mean_std(bucket['RA'])[0], 'ASR': mean_std(bucket['ASR'])[0]}
+                break
+    P_REF_LINESTYLE = {8: ':', 16: '--'}
+
     rng = np.random.default_rng(0)
     fig, (ax_ra, ax_asr) = plt.subplots(1, 2, figsize=(14, 7))
     fig.suptitle(suptitle, fontsize=FS_TITLE_MAIN, fontweight='bold', y=1.02)
@@ -259,6 +272,7 @@ def plot_condition_comparison(conditions, out_path, suptitle, color=None, rotate
     y_max = max(all_vals) * 1.25 if all_vals else 100
 
     def draw(ax, idx, title, direction):
+        metric = 'RA' if idx == 0 else 'ASR'
         for i, (label, ra, asr, hatch, alpha) in enumerate(rows):
             vals = ra if idx == 0 else asr
             m, s = mean_std(vals)
@@ -269,6 +283,9 @@ def plot_condition_comparison(conditions, out_path, suptitle, color=None, rotate
             scatter_seeds(ax, i, vals, rng, scale=1.3)
             ax.text(i, max(vals + [m + s]) + y_max * 0.02, f'{m:.1f}',
                    ha='center', va='bottom', fontsize=14, fontweight='bold', color=color)
+        for ref_p, ref_vals in p_refs.items():
+            ax.axhline(ref_vals[metric], color=color, linestyle=P_REF_LINESTYLE[ref_p],
+                      linewidth=1.3, alpha=0.55, zorder=1)
         ax.set_title(f'{title}\n({direction} is better)', fontsize=16, fontweight='bold', pad=12)
         ax.set_xticks(range(len(rows)))
         if rotate_xlabels:
