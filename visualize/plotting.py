@@ -237,7 +237,7 @@ def plot_condition_comparison(conditions, out_path, suptitle, color=None, rotate
 
     rng = np.random.default_rng(0)
     fig, (ax_ra, ax_asr) = plt.subplots(1, 2, figsize=(14, 7))
-    fig.suptitle(suptitle, fontsize=FS_TITLE_MAIN, fontweight='bold', y=1.03)
+    fig.suptitle(suptitle, fontsize=FS_TITLE_MAIN, fontweight='bold', y=0.99)
 
     all_vals = [v for _, ra, asr, _, _ in rows for v in ra + asr]
     y_max = max(all_vals) * 1.25 if all_vals else 100
@@ -280,7 +280,7 @@ def plot_condition_comparison(conditions, out_path, suptitle, color=None, rotate
     # ax_asr 안쪽(막대 위 여백, y_max에 1.25배 헤드룸이 있어 안 겹침)에 둬서 제목과 안 겹치게 함
     ax_asr.legend(handles=[seed_handle], loc='upper right', fontsize=11, framealpha=0.92)
 
-    plt.tight_layout(rect=[0, 0, 1, 0.90])
+    plt.tight_layout(rect=[0, 0, 1, 0.95])
     plt.savefig(out_path, dpi=150, bbox_inches='tight')
     print(f"Saved: {out_path}")
     plt.close()
@@ -322,7 +322,7 @@ def plot_sweep(x_values, data_by_p, out_path, suptitle, xlabel, attack='lavan'):
     colors = p_color_shades(attack, p_values)
 
     fig, (ax_ra, ax_asr) = plt.subplots(1, 2, figsize=(14, 6.5))
-    fig.suptitle(suptitle, fontsize=FS_TITLE_MAIN, fontweight='bold', y=1.03)
+    fig.suptitle(suptitle, fontsize=FS_TITLE_MAIN, fontweight='bold', y=0.99)
 
     def draw(ax, metric, title, direction):
         for p in p_values:
@@ -345,12 +345,12 @@ def plot_sweep(x_values, data_by_p, out_path, suptitle, xlabel, attack='lavan'):
         ax.grid(alpha=0.3)
         ax.spines['top'].set_visible(False)
         ax.spines['right'].set_visible(False)
-        ax.legend(fontsize=FS_LEGEND, framealpha=0.92)
+        ax.legend(fontsize=FS_LEGEND, framealpha=0.92, loc='upper right')
 
     draw(ax_ra,  'RA',  'Robust Accuracy',    'higher')
     draw(ax_asr, 'ASR', 'Attack Success Rate', 'lower')
 
-    plt.tight_layout(rect=[0, 0, 1, 0.92])
+    plt.tight_layout(rect=[0, 0, 1, 0.95])
     plt.savefig(out_path, dpi=150, bbox_inches='tight')
     print(f"Saved: {out_path}")
     plt.close()
